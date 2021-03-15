@@ -1,8 +1,9 @@
 import argparse
 
-from models.employee import Employee
+from sqlalchemy import create_engine
+
 from models.exceptions import LoginError
-from models.manager import Manager
+from models.role import Role
 from models.user import User
 
 
@@ -23,17 +24,23 @@ def login(username: str, password: str) -> User:
     SECRET_KEY: Final = "admin"
     MANAGER_USERNAME: Final = "trev"
 
+    role: Role
+
     if password != SECRET_KEY:
         raise LoginError()
 
     if username == MANAGER_USERNAME:
-        return Manager(username)
+        role = Role.Manager
     else:
-        return Employee(username)
+        role = Role.Employee
+
+    return User(username, role)
 
 
 if __name__ == "__main__":
     args = get_cli_args()
+
+    engine = create_engine("sqlite: // /: memory: ", echo=True)
     username = args.username
     password = args.password
 
